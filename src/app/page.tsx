@@ -172,14 +172,14 @@ export default function Home() {
                           <td className="p-3">{user.email}</td>
                           <td className="p-3 flex gap-2">
                             <button
-                              className="bg-yellow-500 text-white px-3 py-1 rounded-lg shadow hover:bg-yellow-600 transition"
+                              className="bg-blue-500 text-white px-3 py-1 rounded-lg shadow hover:bg-yellow-600 transition"
                               onClick={() => {
                                 setEditingId(user.id);
                                 setEditingName(user.name);
                                 setEditingEmail(user.email);
                               }}
                             >
-                              Edit
+                              Update
                             </button>
                             <button
                               className="bg-red-500 text-white px-3 py-1 rounded-lg shadow hover:bg-red-600 transition"
