@@ -19,10 +19,8 @@ export default async function handler(
       );
       res.status(201).json(result[0]);
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error(error.message);
-        res.status(500).json({ error: "Failed to create user" });
-      }
+      console.error(error);
+      res.status(500).json({ error: "Failed to create user" });
     }
   } else {
     res.setHeader("Allow", ["POST"]);

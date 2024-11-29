@@ -12,10 +12,8 @@ export default async function handler(
       );
       res.status(200).json(users);
     } catch (error: unknown) {
-      if (error instanceof Error) {
-        console.error(error.message);
-        res.status(500).json({ error: "Failed to fetch users" });
-      }
+      console.error(error);
+      res.status(500).json({ error: "Failed to fetch users" });
     }
   } else {
     res.setHeader("Allow", ["GET"]);
