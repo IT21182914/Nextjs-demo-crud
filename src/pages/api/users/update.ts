@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { query } from "../../../lib/db";
+import { query } from "@/lib/db";
 
 export default async function handler(
   req: NextApiRequest,
@@ -8,14 +8,24 @@ export default async function handler(
   if (req.method === "PUT") {
     const { id, name, email } = req.body;
 
+    if (!id || !name || !email) {
+      return res
+        .status(400)
+        .json({ error: "ID, name, and email are required" });
+    }
+
     try {
-      const result = await query`
-        UPDATE users SET name = ${name}, email = ${email} WHERE id = ${id} RETURNING *`;
+      const result = await query(
+        "UPDATE users SET name = $1, email = $2 WHERE id = $3 RETURNING *",
+        [name, email, id]
+      );
       res.status(200).json(result[0]);
-    } catch (error) {
-      res.status(500).json({ error: (error as Error).message });
+    } catch (error: any) {
+      console.error(error.message);
+      res.status(500).json({ error: "Failed to update user" });
     }
   } else {
-    res.status(405).json({ error: "Method not allowed" });
+    res.setHeader("Allow", ["PUT"]);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }

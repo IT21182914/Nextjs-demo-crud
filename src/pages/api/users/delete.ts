@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { query } from "../../../lib/db";
+import { query } from "@/lib/db";
 
 export default async function handler(
   req: NextApiRequest,
@@ -8,14 +8,19 @@ export default async function handler(
   if (req.method === "DELETE") {
     const { id } = req.body;
 
+    if (!id) {
+      return res.status(400).json({ error: "User ID is required" });
+    }
+
     try {
-      const result = await query`
-        DELETE FROM users WHERE id = ${id} RETURNING *`;
-      res.status(200).json(result[0]);
-    } catch (error) {
-      res.status(500).json({ error: (error as Error).message });
+      await query("DELETE FROM users WHERE id = $1", [id]);
+      res.status(204).end(); // No Content
+    } catch (error: any) {
+      console.error(error.message);
+      res.status(500).json({ error: "Failed to delete user" });
     }
   } else {
-    res.status(405).json({ error: "Method not allowed" });
+    res.setHeader("Allow", ["DELETE"]);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }

@@ -1,5 +1,5 @@
 import { NextApiRequest, NextApiResponse } from "next";
-import { query } from "../../../lib/db";
+import { query } from "@/lib/db";
 
 export default async function handler(
   req: NextApiRequest,
@@ -8,14 +8,22 @@ export default async function handler(
   if (req.method === "POST") {
     const { name, email } = req.body;
 
+    if (!name || !email) {
+      return res.status(400).json({ error: "Name and email are required" });
+    }
+
     try {
-      const result = await query`
-        INSERT INTO users (name, email) VALUES (${name}, ${email}) RETURNING *`;
-      res.status(200).json(result[0]);
-    } catch (error) {
-      res.status(500).json({ error: (error as Error).message });
+      const result = await query(
+        "INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *",
+        [name, email]
+      );
+      res.status(201).json(result[0]);
+    } catch (error: any) {
+      console.error(error.message);
+      res.status(500).json({ error: "Failed to create user" });
     }
   } else {
-    res.status(405).json({ error: "Method not allowed" });
+    res.setHeader("Allow", ["POST"]);
+    res.status(405).end(`Method ${req.method} Not Allowed`);
   }
 }
