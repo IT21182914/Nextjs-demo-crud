@@ -15,9 +15,11 @@ export default function Home() {
   const [editingId, setEditingId] = useState<number | null>(null);
   const [editingName, setEditingName] = useState("");
   const [editingEmail, setEditingEmail] = useState("");
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     async function fetchUsers() {
+      setLoading(true);
       try {
         const response = await fetch("/api/users");
         if (!response.ok) throw new Error("Failed to fetch users");
@@ -25,12 +27,15 @@ export default function Home() {
         setUsers(data);
       } catch (error) {
         console.error(error);
+      } finally {
+        setLoading(false);
       }
     }
     fetchUsers();
   }, []);
 
   const handleCreate = async () => {
+    setLoading(true);
     try {
       const response = await fetch("/api/users/create", {
         method: "POST",
@@ -44,10 +49,13 @@ export default function Home() {
       setEmail("");
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleUpdate = async (id: number) => {
+    setLoading(true);
     try {
       const response = await fetch("/api/users/update", {
         method: "PUT",
@@ -62,10 +70,13 @@ export default function Home() {
       setEditingId(null);
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
   const handleDelete = async (id: number) => {
+    setLoading(true);
     try {
       const response = await fetch("/api/users/delete", {
         method: "DELETE",
@@ -77,6 +88,8 @@ export default function Home() {
       setUsers((prev) => prev.filter((user) => user.id !== id));
     } catch (error) {
       console.error(error);
+    } finally {
+      setLoading(false);
     }
   };
 
@@ -87,7 +100,6 @@ export default function Home() {
           User Management System
         </h1>
 
-        {/* Create Form */}
         <div className="bg-gray-100 p-4 rounded-lg shadow-sm mb-6">
           <h2 className="text-xl font-semibold mb-4">Add New User</h2>
           <div className="flex gap-4">
@@ -97,6 +109,7 @@ export default function Home() {
               className="border rounded-lg p-2 flex-1"
               value={name}
               onChange={(e) => setName(e.target.value)}
+              disabled={loading}
             />
             <input
               type="email"
@@ -104,32 +117,39 @@ export default function Home() {
               className="border rounded-lg p-2 flex-1"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
+              disabled={loading}
             />
             <button
               className="bg-blue-600 text-white px-4 py-2 rounded-lg shadow hover:bg-blue-700 transition"
               onClick={handleCreate}
+              disabled={loading}
             >
               Create
             </button>
           </div>
         </div>
 
-        {/* Users List */}
         <div>
           <h2 className="text-xl font-semibold mb-4">User List</h2>
-          <div className="overflow-x-auto">
-            <table className="table-auto w-full border-collapse bg-gray-50 rounded-lg shadow">
-              <thead>
-                <tr className="bg-blue-100 text-blue-600">
-                  <th className="p-3 text-left">ID</th>
-                  <th className="p-3 text-left">Name</th>
-                  <th className="p-3 text-left">Email</th>
-                  <th className="p-3 text-left">Actions</th>
-                </tr>
-              </thead>
-              <tbody>
-                {users.length > 0 ? (
-                  users.map((user) => (
+          {loading ? (
+            <div className="flex justify-center items-center">
+              <div className="loader border-t-4 border-blue-500 w-8 h-8 rounded-full animate-spin"></div>
+            </div>
+          ) : users.length === 0 ? (
+            <div className="text-center text-gray-600">No users found.</div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="table-auto w-full border-collapse bg-gray-50 rounded-lg shadow">
+                <thead>
+                  <tr className="bg-blue-100 text-blue-600">
+                    <th className="p-3 text-left">ID</th>
+                    <th className="p-3 text-left">Name</th>
+                    <th className="p-3 text-left">Email</th>
+                    <th className="p-3 text-left">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {users.map((user) => (
                     <tr key={user.id} className="hover:bg-gray-100 transition">
                       {editingId === user.id ? (
                         <>
@@ -140,6 +160,7 @@ export default function Home() {
                               value={editingName}
                               onChange={(e) => setEditingName(e.target.value)}
                               className="border rounded-lg p-2 w-full"
+                              disabled={loading}
                             />
                           </td>
                           <td className="p-3">
@@ -148,18 +169,21 @@ export default function Home() {
                               value={editingEmail}
                               onChange={(e) => setEditingEmail(e.target.value)}
                               className="border rounded-lg p-2 w-full"
+                              disabled={loading}
                             />
                           </td>
                           <td className="p-3 flex gap-2">
                             <button
                               className="bg-green-600 text-white px-3 py-1 rounded-lg shadow hover:bg-green-700 transition"
                               onClick={() => handleUpdate(user.id)}
+                              disabled={loading}
                             >
                               Save
                             </button>
                             <button
                               className="bg-gray-500 text-white px-3 py-1 rounded-lg shadow hover:bg-gray-600 transition"
                               onClick={() => setEditingId(null)}
+                              disabled={loading}
                             >
                               Cancel
                             </button>
@@ -172,18 +196,20 @@ export default function Home() {
                           <td className="p-3">{user.email}</td>
                           <td className="p-3 flex gap-2">
                             <button
-                              className="bg-blue-500 text-white px-3 py-1 rounded-lg shadow hover:bg-yellow-600 transition"
+                              className="bg-blue-500 text-white px-3 py-1 rounded-lg shadow hover:bg-blue-700 transition"
                               onClick={() => {
                                 setEditingId(user.id);
                                 setEditingName(user.name);
                                 setEditingEmail(user.email);
                               }}
+                              disabled={loading}
                             >
                               Update
                             </button>
                             <button
                               className="bg-red-500 text-white px-3 py-1 rounded-lg shadow hover:bg-red-600 transition"
                               onClick={() => handleDelete(user.id)}
+                              disabled={loading}
                             >
                               Delete
                             </button>
@@ -191,17 +217,11 @@ export default function Home() {
                         </>
                       )}
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={4} className="text-center p-4 text-gray-600">
-                      No users found.
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          )}
         </div>
       </div>
     </div>
