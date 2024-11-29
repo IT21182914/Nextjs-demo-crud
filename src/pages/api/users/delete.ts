@@ -9,12 +9,12 @@ export default async function handler(
     const { id } = req.body;
 
     if (!id) {
-      return res.status(400).json({ error: "User ID is required" });
+      return res.status(400).json({ error: "ID is required" });
     }
 
     try {
       await query("DELETE FROM users WHERE id = $1", [id]);
-      res.status(204).end(); // No Content
+      res.status(200).json({ message: "User deleted successfully" });
     } catch (error: any) {
       console.error(error.message);
       res.status(500).json({ error: "Failed to delete user" });
