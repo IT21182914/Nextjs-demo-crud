@@ -13,14 +13,16 @@ export default async function handler(
     }
 
     try {
-      const result = await query(
+      const result = await query<{ id: number; name: string; email: string }>(
         "INSERT INTO users (name, email) VALUES ($1, $2) RETURNING *",
         [name, email]
       );
       res.status(201).json(result[0]);
-    } catch (error: any) {
-      console.error(error.message);
-      res.status(500).json({ error: "Failed to create user" });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(error.message);
+        res.status(500).json({ error: "Failed to create user" });
+      }
     }
   } else {
     res.setHeader("Allow", ["POST"]);

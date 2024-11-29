@@ -7,11 +7,15 @@ export default async function handler(
 ) {
   if (req.method === "GET") {
     try {
-      const users = await query("SELECT * FROM users ORDER BY id ASC");
+      const users = await query<{ id: number; name: string; email: string }>(
+        "SELECT * FROM users ORDER BY id ASC"
+      );
       res.status(200).json(users);
-    } catch (error: any) {
-      console.error(error.message);
-      res.status(500).json({ error: "Failed to fetch users" });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(error.message);
+        res.status(500).json({ error: "Failed to fetch users" });
+      }
     }
   } else {
     res.setHeader("Allow", ["GET"]);

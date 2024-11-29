@@ -15,14 +15,16 @@ export default async function handler(
     }
 
     try {
-      const result = await query(
+      const result = await query<{ id: number; name: string; email: string }>(
         "UPDATE users SET name = $1, email = $2 WHERE id = $3 RETURNING *",
         [name, email, id]
       );
       res.status(200).json(result[0]);
-    } catch (error: any) {
-      console.error(error.message);
-      res.status(500).json({ error: "Failed to update user" });
+    } catch (error: unknown) {
+      if (error instanceof Error) {
+        console.error(error.message);
+        res.status(500).json({ error: "Failed to update user" });
+      }
     }
   } else {
     res.setHeader("Allow", ["PUT"]);
