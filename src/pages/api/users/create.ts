@@ -1,12 +1,6 @@
 import { NextApiRequest, NextApiResponse } from "next";
 import { query } from "../../../lib/db";
 
-type User = {
-  id: number;
-  name: string;
-  email: string;
-};
-
 export default async function handler(
   req: NextApiRequest,
   res: NextApiResponse
@@ -15,7 +9,7 @@ export default async function handler(
     const { name, email } = req.body;
 
     try {
-      const result = await query<User>`
+      const result = await query`
         INSERT INTO users (name, email) VALUES (${name}, ${email}) RETURNING *`;
       res.status(200).json(result[0]);
     } catch (error) {
