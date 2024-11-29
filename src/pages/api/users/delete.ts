@@ -13,11 +13,13 @@ export default async function handler(
     }
 
     try {
-      await query<{}>("DELETE FROM users WHERE id = $1", [id]);
+      await query<unknown>("DELETE FROM users WHERE id = $1", [id]);
       res.status(200).json({ message: "User deleted successfully" });
     } catch (error: unknown) {
-      console.error(error);
-      res.status(500).json({ error: "Failed to delete user" });
+      if (error instanceof Error) {
+        console.error(error.message);
+        res.status(500).json({ error: "Failed to delete user" });
+      }
     }
   } else {
     res.setHeader("Allow", ["DELETE"]);
